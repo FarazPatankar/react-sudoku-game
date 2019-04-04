@@ -1,3 +1,4 @@
+/* eslint-disable object-curly-newline */
 /* eslint-disable jsx-a11y/accessible-emoji */
 import React, { Component } from 'react';
 import { Set, List, fromJS } from 'immutable';
@@ -20,8 +21,9 @@ import { backGroundBlue } from '../colors';
 import Tip from '../components/tool-tip';
 
 
-const Description = 'Discover the next evolution of Sudoku with amazing graphics, animations, and user-friendly features. Enjoy a Sudoku experience like you never have before with customizable game generation, cell highlighting, intuitive controls and more!';
-const cellWidth = 2.5;
+// const Description = 'Discover the next evolution of Sudoku with amazing graphics, animations, and user-friendly features. Enjoy a Sudoku experience like you never have before with customizable game generation, cell highlighting, intuitive controls and more!';
+const Description = 'Sudoku Variants is a platform that allows you to play various Sudoku variations like Frame Sudoku and Between 1-9 Sudoku.';
+const cellWidth = 2;
 
 const LightBlue100 = '#B3E5FC';
 const LightBlue200 = '#81D4FA';
@@ -205,11 +207,11 @@ class GenerationUI extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { value: 30 };
+    this.state = { value: 15 };
   }
 
-  generateGame = () => {
-    this.props.generateGame(this.state.value);
+  generateGame = (type) => {
+    this.props.generateGame(this.state.value, type);
   }
 
   render() {
@@ -218,11 +220,15 @@ class GenerationUI extends Component {
         <div className="copy">Start with {this.state.value} cells prefilled</div>
         <InputRange
           maxValue={81}
-          minValue={17}
+          minValue={9}
           value={this.state.value}
           onChange={value => this.setState({ value })}
         />
-        <div className="button" onClick={this.generateGame}>Play Sudoku</div>
+        <div className="button-container">
+          <div className="button" onClick={() => this.generateGame('normal')}>Play Normal Sudoku</div>
+          <div className="button" onClick={() => this.generateGame('frame')}>Play Frame Sudoku</div>
+          <div className="button" onClick={() => this.generateGame('1-9')}>Play Between 1-9 Sudoku</div>
+        </div>
         { /* language=CSS */ }
         <style jsx>{`
             .copy {
@@ -236,13 +242,20 @@ class GenerationUI extends Component {
                 flex-direction: column;
                 width: 100%;
                 align-items: center;
+                flex: 2;
+                height: 90vh;
             }
             :global(.input-range) {
                 width: 80%;
                 max-width: 500px;
             }
+            .button-container {
+              display: flex;
+              flex-wrap: wrap;
+              justify-content: center;
+            }
             .button {
-              margin-top: .5em;
+              margin: .5em;
               border-radius: .25em;
               cursor: pointer;
               font-weight: bold;
@@ -501,7 +514,7 @@ export default class Index extends Component {
     );
   }
 
-  generateGame = (finalCount = 20) => {
+  generateGame = (finalCount = 20, type = 'normal') => {
     // get a filled puzzle generated
     const solution = makePuzzle();
     // pluck values from cells to create the game
@@ -509,7 +522,7 @@ export default class Index extends Component {
     // initialize the board with choice counts
     const board = makeBoard({ puzzle });
     this.setState({
-      board, history: List.of(board), historyOffSet: 0, solution,
+      board, history: List.of(board), historyOffSet: 0, solution, type,
     });
   }
 
@@ -632,6 +645,7 @@ export default class Index extends Component {
     return rowConflict || columnConflict || squareConflict;
   }
 
+  // eslint-disable-next-line react/sort-comp
   renderCell(cell, x, y) {
     const { board } = this.state;
     const selected = this.getSelectedCell();
@@ -709,19 +723,176 @@ export default class Index extends Component {
     );
   }
 
+  sumTopRow() {
+    const { solution } = this.state;
+    const sums = [];
+
+    for (let x = 0; x < 9; x += 1) {
+      let sum = 0;
+      for (let y = 0; y < 3; y += 1) {
+        sum += solution[y][x];
+      }
+
+      sums.push(sum);
+    }
+
+    return sums;
+  }
+
+  sumBottomRow() {
+    const { solution } = this.state;
+    const sums = [];
+
+    for (let x = 0; x < 9; x += 1) {
+      let sum = 0;
+      for (let y = 6; y < 9; y += 1) {
+        sum += solution[y][x];
+      }
+
+      sums.push(sum);
+    }
+
+    return sums;
+  }
+
+  sumLeftColumn() {
+    const { solution } = this.state;
+    const sums = [];
+
+    for (let x = 0; x < 9; x += 1) {
+      let sum = 0;
+      for (let y = 0; y < 3; y += 1) {
+        sum += solution[x][y];
+      }
+
+      sums.push(sum);
+    }
+
+    return sums;
+  }
+
+  sumRightColumn() {
+    const { solution } = this.state;
+    const sums = [];
+
+    for (let x = 0; x < 9; x += 1) {
+      let sum = 0;
+      for (let y = 6; y < 9; y += 1) {
+        sum += solution[x][y];
+      }
+
+      sums.push(sum);
+    }
+
+    return sums;
+  }
+
+  generateOneToNineCol() {
+    // eslint-disable-next-line no-unused-vars
+    const { solution } = this.state;
+
+    const sums = [];
+
+    solution.map((row) => {
+      const indexOfOne = row.indexOf(1);
+      const indexOfNine = row.indexOf(9);
+      const oneComesFirst = indexOfOne < indexOfNine;
+      const startIndex = oneComesFirst ? indexOfOne : indexOfNine;
+      let endIndex = oneComesFirst ? indexOfNine : indexOfOne;
+      endIndex = endIndex === (row.length - 1) ? endIndex + 1 : endIndex;
+
+      const elementsToSum = row.slice(startIndex + 1, endIndex);
+      const sum = elementsToSum.reduce((a, b) => a + b, 0);
+
+      sums.push(sum);
+    })
+
+    return sums;
+  }
+
+  generateOneToNineRow() {
+    // eslint-disable-next-line no-unused-vars
+    const { solution } = this.state;
+
+    const sums = [];
+    const columns = [];
+
+    for (let x = 0; x < 9; x += 1) {
+      const column = [];
+      for (let y = 0; y < 9; y += 1) {
+        column.push(solution[y][x]);
+      }
+
+      columns.push(column);
+    }
+
+    columns.map((row) => {
+      const indexOfOne = row.indexOf(1);
+      const indexOfNine = row.indexOf(9);
+      const oneComesFirst = indexOfOne < indexOfNine;
+      const startIndex = oneComesFirst ? indexOfOne : indexOfNine;
+      let endIndex = oneComesFirst ? indexOfNine : indexOfOne;
+      const isLastIndex = endIndex === (row.length - 1);
+      endIndex = isLastIndex ? endIndex + 1 : endIndex;
+
+      const elementsToSum = row.slice(startIndex + 1, isLastIndex ? endIndex - 1 : endIndex);
+      const sum = elementsToSum.reduce((a, b) => a + b, 0);
+
+      sums.push(sum);
+    })
+
+    return sums;
+  }
+
   renderPuzzle() {
-    const { board } = this.state;
+    const { board, type } = this.state;
     return (
-      <div className="puzzle">
-        {board.get('puzzle').map((row, i) => (
-          // eslint-disable-next-line react/no-array-index-key
-          <div key={i} className="row">
-            {
-              row.map((cell, j) => this.renderCell(cell, i, j)).toArray()
-            }
+      <div style={{ display: 'flex', marginBottom: '50px' }}>
+        <div style={{ position: 'relative' }}>
+          {type === 'frame' && (
+            <div style={{ display: 'flex', justifyContent: 'space-around', position: 'absolute', width: '100%', top: '-5%' }}>
+              {this.sumTopRow().map(num => <div className="sum">{num}</div>)}
+            </div>
+          )}
+          <div style={{ display: 'flex' }}>
+            {type === 'frame' && (
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', position: 'absolute', height: '100%', left: '-10%' }}>
+                {this.sumLeftColumn().map(num => <div className="sum">{num}</div>)}
+              </div>
+            )}
+            <div className="puzzle">
+              {board.get('puzzle').map((row, i) => (
+                // eslint-disable-next-line react/no-array-index-key
+                <div key={i} className="row">
+                  {
+                    row.map((cell, j) => this.renderCell(cell, i, j)).toArray()
+                  }
+                </div>
+              )).toArray()}
+              <style jsx>{PuzzleStyle}</style>
+            </div>
+            {type === 'frame' && (
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', position: 'absolute', height: '100%', right: '-10%' }}>
+                {this.sumRightColumn().map(num => <div className="sum">{num}</div>)}
+              </div>
+            )}
+            {type === '1-9' && (
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', position: 'absolute', height: '100%', right: '-10%' }}>
+                {this.generateOneToNineCol().map(num => <div className="sum">{num}</div>)}
+              </div>
+            )}
           </div>
-        )).toArray()}
-        <style jsx>{PuzzleStyle}</style>
+          {type === 'frame' && (
+            <div style={{ display: 'flex', justifyContent: 'space-around', position: 'absolute', width: '100%', bottom: '-8%' }}>
+              {this.sumBottomRow().map(num => <div className="sum">{num}</div>)}
+            </div>
+          )}
+          {type === '1-9' && (
+            <div style={{ display: 'flex', justifyContent: 'space-around', position: 'absolute', width: '100%', bottom: '-8%' }}>
+              {this.generateOneToNineRow().map(num => <div className="sum">{num}</div>)}
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -770,6 +941,7 @@ export default class Index extends Component {
                 max-width: 500px;
                 padding: 0 0.5em;
                 box-sizing: border-box;
+                margin-top: 50px;
             }
             .new-game {
                 cursor: pointer;
@@ -794,25 +966,30 @@ export default class Index extends Component {
     return (
       <div className="body">
         <NextHead>
-          <title>Sudoku Evolved</title>
+          <title>Sudoku Variants</title>
           <meta name="viewport" content="initial-scale=1.0, width=device-width" />
           <meta name="description" content={Description} />
           <link href="https://fonts.googleapis.com/css?family=Special+Elite" rel="stylesheet" />
           <meta property="og:url" content="https://sudoku.sitianliu.com/" />
-          <meta property="og:title" content="Sudoku Evolved" />
+          <meta property="og:title" content="Sudoku Variants" />
           <meta property="og:type" content="website" />
           <meta property="og:description" content={Description} />
           <meta property="og:image" content="https://sudoku.sitianliu.com/static/og-image.png" />
         </NextHead>
         {!board && this.renderGenerationUI()}
         {board && this.renderHeader()}
-        {board && this.renderPuzzle()}
-        {board && this.renderControls()}
+        {board && (<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '25px 0', flex: 2, justifyContent: 'center' }}>
+          {board && this.renderPuzzle()}
+          {board && this.renderControls()}
+        </div>)}
         <div className="rooter">
-          Made with <span>❤️</span>️ By <a href="https://www.sitianliu.com/">Sitian Liu</a> | <a href="https://medium.com/@sitianliu_57680/building-a-sudoku-game-in-react-ca663915712">Blog Post</a>
+          Made with <span>❤️</span>️ By <a href="https://www.farazpatankar.com/">Faraz Patankar</a>
         </div>
         { /* language=CSS */ }
         <style jsx>{`
+            :global(html, body, #__next, .body) {
+              height: 100%;
+            }
             :global(body), .body {
                 font-family: 'Special Elite', cursive;
             }
@@ -821,8 +998,6 @@ export default class Index extends Component {
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                height: 100vh;
-                width: 100vw;
                 position: relative;
             }
             @media (min-width: 800px) and (min-height: 930px){
@@ -859,11 +1034,10 @@ export default class Index extends Component {
                 margin: 0;
             }
             .rooter {
-                position: fixed;
-                bottom: 0;
                 font-size: .8em;
                 width: 100%;
                 text-align: center;
+                margin-bottom: 50px;
             }
         `}
         </style>
