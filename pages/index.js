@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 import NextHead from 'next/head';
 import Color from 'color';
 import InputRange from 'react-input-range';
+import ReactGA from 'react-ga';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import css from 'styled-jsx/css';
@@ -21,6 +22,11 @@ import ReturnIcon from '../svg/return.svg';
 import { makePuzzle, pluck, isPeer as areCoordinatePeers, range } from '../sudoku';
 import { backGroundBlue } from '../colors';
 import Tip from '../components/tool-tip';
+
+
+if (process.env.NODE_ENV === 'production') {
+  ReactGA.initialize('UA-100343895-8');
+}
 
 
 // const Description = 'Discover the next evolution of Sudoku with amazing graphics, animations, and user-friendly features. Enjoy a Sudoku experience like you never have before with customizable game generation, cell highlighting, intuitive controls and more!';
@@ -495,6 +501,8 @@ export default class Index extends Component {
           console.warn('service worker registration failed', err.message);
         });
     }
+
+    ReactGA.pageview('/');
   }
   getSelectedCell() {
     const { board } = this.state;
@@ -1124,7 +1132,7 @@ export default class Index extends Component {
           .input-range {
             height: 1rem;
             position: relative;
-            width: 100%; }
+            width: 90%; }
         `}
         </style>
       </div>
