@@ -1,5 +1,7 @@
 /* eslint-disable object-curly-newline */
 /* eslint-disable jsx-a11y/accessible-emoji */
+// import 'react-input-range/lib/css/index.css';
+
 import React, { Component } from 'react';
 import { Set, List, fromJS } from 'immutable';
 import PropTypes from 'prop-types';
@@ -10,7 +12,7 @@ import InputRange from 'react-input-range';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import css from 'styled-jsx/css';
 
-import RangeStyle from '../input-range-style';
+// import RangeStyle from '../input-range-style';
 import LoupeIcon from '../svg/loupe.svg';
 import RemoveIcon from '../svg/remove.svg';
 import ReloadIcon from '../svg/reload.svg';
@@ -1041,7 +1043,90 @@ export default class Index extends Component {
             }
         `}
         </style>
-        <style jsx global>{RangeStyle}</style>
+        <style jsx global>{`
+          .input-range__slider {
+            appearance: none;
+            background: #3f51b5;
+            border: 1px solid #3f51b5;
+            border-radius: 100%;
+            cursor: pointer;
+            display: block;
+            height: 1rem;
+            margin-left: -0.5rem;
+            margin-top: -0.65rem;
+            outline: none;
+            position: absolute;
+            top: 50%;
+            transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+            width: 1rem; }
+            .input-range__slider:active {
+              transform: scale(1.3); }
+            .input-range__slider:focus {
+              box-shadow: 0 0 0 5px rgba(63, 81, 181, 0.2); }
+            .input-range--disabled .input-range__slider {
+              background: #cccccc;
+              border: 1px solid #cccccc;
+              box-shadow: none;
+              transform: none; }
+          
+          .input-range__slider-container {
+            transition: left 0.3s ease-out; }
+          
+          .input-range__label {
+            color: #aaaaaa;
+            font-family: "Helvetica Neue", san-serif;
+            font-size: 0.8rem;
+            transform: translateZ(0);
+            white-space: nowrap; }
+          
+          .input-range__label--min,
+          .input-range__label--max {
+            bottom: -1.4rem;
+            position: absolute; }
+          
+          .input-range__label--min {
+            left: 0; }
+          
+          .input-range__label--max {
+            right: 0; }
+          
+          .input-range__label--value {
+            position: absolute;
+            top: -1.8rem; }
+          
+          .input-range__label-container {
+            left: -50%;
+            position: relative; }
+            .input-range__label--max .input-range__label-container {
+              left: 50%; }
+          
+          .input-range__track {
+            background: #eeeeee;
+            border-radius: 0.3rem;
+            cursor: pointer;
+            display: block;
+            height: 0.3rem;
+            position: relative;
+            transition: left 0.3s ease-out, width 0.3s ease-out; }
+            .input-range--disabled .input-range__track {
+              background: #eeeeee; }
+          
+          .input-range__track--background {
+            left: 0;
+            margin-top: -0.15rem;
+            position: absolute;
+            right: 0;
+            top: 50%; }
+          
+          .input-range__track--active {
+            background: #3f51b5; }
+          
+          .input-range {
+            height: 1rem;
+            position: relative;
+            width: 100%; }
+        `}
+        </style>
       </div>
     );
   }
