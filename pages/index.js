@@ -809,9 +809,10 @@ export default class Index extends Component {
       const oneComesFirst = indexOfOne < indexOfNine;
       const startIndex = oneComesFirst ? indexOfOne : indexOfNine;
       let endIndex = oneComesFirst ? indexOfNine : indexOfOne;
-      endIndex = endIndex === (row.length - 1) ? endIndex + 1 : endIndex;
+      const isLastIndex = endIndex === (row.length - 1);
+      endIndex = isLastIndex ? endIndex + 1 : endIndex;
 
-      const elementsToSum = row.slice(startIndex + 1, endIndex);
+      const elementsToSum = row.slice(startIndex + 1, isLastIndex ? endIndex - 1 : endIndex);
       const sum = elementsToSum.reduce((a, b) => a + b, 0);
 
       sums.push(sum);
@@ -860,7 +861,7 @@ export default class Index extends Component {
       <div style={{ display: 'flex', marginBottom: '50px' }}>
         <div style={{ position: 'relative' }}>
           {type === 'frame' && (
-            <div style={{ display: 'flex', justifyContent: 'space-around', position: 'absolute', width: '100%', top: '-5%' }}>
+            <div className="top-col" style={{ display: 'flex', justifyContent: 'space-around', position: 'absolute', width: '100%', top: '-5%' }}>
               {this.sumTopRow().map(num => <div className="sum">{num}</div>)}
             </div>
           )}
@@ -879,7 +880,6 @@ export default class Index extends Component {
                   }
                 </div>
               )).toArray()}
-              <style jsx>{PuzzleStyle}</style>
             </div>
             {type === 'frame' && (
               <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-around', position: 'absolute', height: '100%', right: '-10%' }}>
@@ -903,6 +903,19 @@ export default class Index extends Component {
             </div>
           )}
         </div>
+        <style jsx>{PuzzleStyle}</style>
+        <style jsx>{`
+            .sum {
+              height: 2em;
+              display: flex;
+              align-items: flex-end;
+            }
+
+            .top-col .sum {
+              align-items: flex-start;
+            }
+        `}
+        </style>
       </div>
     );
   }
